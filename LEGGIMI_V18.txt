@@ -1,0 +1,18 @@
+SERIEA 9000 MOMENTS 3D — V18 COHERENCE PASS
+
+Include tutta la V17 SUPER e aggiunge:
+- porte e reti orientate correttamente verso l’esterno del campo
+- kickoff realmente visibile dopo l’intro TV
+- azioni salienti con lead-in 3D piu lungo e palla realmente in movimento
+- HUD TV molto piu pulito e campo dominante
+- pannelli analisi numerica nascosti nel gameplay normale (Shift+D = debug)
+- decisioni contestuali centrate e compatte
+- feedback QTE meno invasivo
+- Contextual Action Engine: le opzioni cambiano in base alla distanza dalla porta
+  COSTRUZIONE / CENTROCAMPO / TREQUARTI / AREA
+- niente tiro assurdo da centrocampo quando il giocatore sta proteggendo/costruendo
+- passaggi di costruzione possono continuare la manovra con nuove linee 1/2/3
+- movimenti dei riceventi relativi alla posizione reale della palla
+- testi e telecronaca riscritti in modo piu calcistico
+
+NOTA: questa build e una beta di sviluppo. Il tasto Shift+D mostra il pannello tecnico nascosto per debug.
