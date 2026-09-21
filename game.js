@@ -93,7 +93,17 @@ function oppTeam(){return userIsHome()?state.current.a:state.current.h}
 function updateScore(){refs.score.textContent=`${state.homeGoals} - ${state.awayGoals}`}
 
 function startMatch(){let [h,a]=getUserFixture();state.current={h,a};state.homeGoals=0;state.awayGoals=0;state.moment=0;state.events=[];state.usedKinds=[];state.chain=null;state.totalMoments=3+Math.floor(Math.random()*2);refs.homeBox.innerHTML=`<div class="club">${crest(h)}</div>`;refs.awayBox.innerHTML=`<div class="club">${crest(a)}</div>`;refs.tvHomeCode.textContent=h.name.slice(0,3).toUpperCase();refs.tvAwayCode.textContent=a.name.slice(0,3).toUpperCase();refs.score.textContent='0 - 0';refs.clock.textContent="0'";refs.momentCount.textContent=`MOMENTO 0/${state.totalMoments}`;refs.commentary.textContent=`${h.name} - ${a.name}. Collegamento in diretta.`;refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');show('screenMatch');S9Scene.setTeams(h,a).then(()=>{S9Scene.reset();runTVIntro(h,a)})}
-function runTVIntro(h,a){refs.prematchOverlay.classList.remove('hidden');refs.prematchTeams.textContent=`${h.name} ${h.season}  ·  ${a.name} ${a.season}`;refs.prematchCompetition.textContent='SERIEA 9000 · CAMPIONATO';refs.prematchTitle.textContent='MATCH DAY';refs.prematchSub.textContent='COLLEGAMENTO DALLO STADIO';refs.lowerThirdTitle.textContent='STUDIO';refs.commentary.textContent='Benvenuti alla diretta. Tra poco il calcio d’inizio.';setTimeout(()=>{refs.prematchTitle.textContent='I COMMENTATORI';refs.prematchSub.textContent='TELECRONACA · ANALISI TECNICA';refs.commentary.textContent='Le squadre sono pronte. Attenzione ai duelli individuali nei momenti chiave.'},1150);setTimeout(()=>{refs.prematchTitle.textContent='LANCIO DELLA MONETA';refs.prematchSub.textContent=Math.random()<.5?`${h.name.toUpperCase()} SCEGLIE IL CAMPO`:`${a.name.toUpperCase()} SCEGLIE IL CAMPO`;refs.commentary.textContent='I capitani sono con l’arbitro a centrocampo.';S9Scene.coinToss?.()},2450);setTimeout(()=>{refs.prematchTitle.textContent='SI PARTE';refs.prematchSub.textContent='FISCHIO D’INIZIO';refs.lowerThirdTitle.textContent='TELECRONACA';refs.commentary.textContent=`${h.name} - ${a.name}. Inizia la partita.`},3550);setTimeout(()=>{refs.prematchOverlay.classList.add('hidden');nextMoment()},4300)}
+function runTVIntro(h,a){
+ refs.prematchOverlay.classList.remove('hidden');
+ refs.prematchTeams.textContent=`${h.name} ${h.season}  ·  ${a.name} ${a.season}`;
+ refs.prematchCompetition.textContent='SERIEA 9000 · CAMPIONATO';
+ refs.prematchTitle.textContent='MATCH DAY';refs.prematchSub.textContent='COLLEGAMENTO DALLO STADIO';
+ refs.lowerThirdTitle.textContent='S9 TV';refs.commentary.textContent='Le squadre stanno per entrare in campo.';
+ setTimeout(()=>{refs.prematchTitle.textContent='IN CABINA';refs.prematchSub.textContent='TELECRONACA · COMMENTO TECNICO';refs.commentary.textContent='Tutto pronto. Tra poco si gioca.'},1050);
+ setTimeout(()=>{refs.prematchTitle.textContent='LANCIO DELLA MONETA';refs.prematchSub.textContent=Math.random()<.5?`${h.name.toUpperCase()} SCEGLIE IL CAMPO`:`${a.name.toUpperCase()} SCEGLIE IL CAMPO`;refs.commentary.textContent='I capitani raggiungono l’arbitro a centrocampo.';S9Scene.coinToss?.()},2200);
+ setTimeout(()=>{refs.prematchTitle.textContent='CALCIO D’INIZIO';refs.prematchSub.textContent='SI PARTE';refs.lowerThirdTitle.textContent='TELECRONACA';refs.commentary.textContent=`${h.name} - ${a.name}. Fischio dell’arbitro.`},3300);
+ setTimeout(()=>{refs.prematchOverlay.classList.add('hidden');refs.commentary.textContent='Palla in gioco. Le squadre iniziano a costruire.';S9Scene.kickoffSequence(userIsHome()).then(()=>setTimeout(nextMoment,550))},4050)
+}
 function ambientSim(minute){let me=state.team.strength,opp=oppTeam().strength;let deficit=userIsHome()?state.homeGoals-state.awayGoals:state.awayGoals-state.homeGoals;let base=.075+clamp((opp-me)/180,-.025,.04);if(deficit>0)base+=.012;if(minute>70)base+=.015;if(Math.random()<base){if(userIsHome())state.awayGoals++;else state.homeGoals++;state.events.push(`${minute}' Gol ${oppTeam().name} (simulato)`);updateScore();refs.commentary.textContent='GOL AVVERSARIO durante la fase simulata.'}else if(Math.random()<.06+clamp((me-opp)/200,-.02,.03)){if(userIsHome())state.homeGoals++;else state.awayGoals++;state.events.push(`${minute}' Gol ${state.team.name} (simulato)`);updateScore();refs.commentary.textContent='La tua squadra trova il gol durante la fase simulata.'}else refs.commentary.textContent=`${minute}' Il gioco scorre. Le squadre si ridispongono...`}
 function weightedMoment(minute){let deficit=userIsHome()?state.homeGoals-state.awayGoals:state.awayGoals-state.homeGoals;let pool=MOMENTS.filter(m=>!state.usedKinds.includes(m.kind));if(!pool.length)pool=MOMENTS;let weighted=[];for(const m of pool){let w=1;if(minute>65&&deficit<0&&!m.def)w+=1.4;if(minute>65&&deficit>0&&m.def)w+=1.1;if(m.type==='PIAZZATO')w=m.kind==='penalty'?.28:.72;for(let i=0;i<Math.ceil(w*4);i++)weighted.push(m)}return weighted[Math.floor(Math.random()*weighted.length)]}
 
@@ -115,8 +125,8 @@ function routePlayers(){
 function shouldUseReceiverPhase(m){return !m.def&&(m.kind==='counter'||m.kind==='duel')}
 function showReceiverSelection(){
  let opts=routePlayers();state.chain.receiverOptions=opts;refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');
- refs.chainStep.textContent='FASE 1 · LEGGI IL CAMPO';refs.momentText.textContent='Scegli il compagno da servire direttamente sul campo. Il passaggio seguirà la sua corsa.';
- refs.commentary.textContent='SCEGLI IL RICEVENTE · premi 1, 2, 3 oppure tocca il giocatore.';refs.receiverHint.classList.remove('hidden');
+ refs.chainStep.textContent='LEGGI I MOVIMENTI';refs.momentText.textContent='I compagni si stanno muovendo. Scegli una linea di passaggio disponibile.';
+ refs.lowerThirdTitle.textContent=state.chain.actor?.name?.toUpperCase()||'POSSESSO';refs.commentary.textContent='Guarda il campo: 1, 2 o 3 indicano i compagni realmente servibili.';refs.receiverHint.textContent='PASSAGGIO · 1 / 2 / 3';refs.receiverHint.classList.remove('hidden');
  S9Scene.beginReceiverSelection(opts,opt=>{refs.receiverHint.classList.add('hidden');onReceiverChosen(opt)});
 }
 function onReceiverChosen(opt){
@@ -143,22 +153,61 @@ function triggerTurnover(text){
    showDefenderSelection();
  });
 }
+function contextualRouteChoices(opt){
+ let ctx=S9Scene.getReceiverContext(opt),wide=ctx.wide,natural=(opt.lane==='left'&&opt.foot==='L')||(opt.lane==='right'&&opt.foot==='R');
+ let choices=[];
+ if(ctx.zone==='COSTRUZIONE'){
+  choices=[
+   {label:'APPOGGIA E RICOMINCIA',risk:'low',qte:'timing',stat:'passing',base:.72,sceneAction:'support',continueBuild:true,desc:'Scarico semplice: mantieni il possesso e fai salire la squadra.'},
+   {label:'CAMBIO GIOCO',risk:'mid',qte:'timing',stat:'passing',base:.60,sceneAction:'switch',continueBuild:true,desc:'Cerchi il lato debole prima che il pressing scivoli.'},
+   {label:'PORTA PALLA',risk:'mid',qte:'sequence',stat:'dribbling',base:.61,sceneAction:'carry',continueBuild:true,desc:'Guadagni metri se davanti a te c’è spazio.'}
+  ];
+ }else if(ctx.zone==='CENTROCAMPO'){
+  choices=wide?[
+   {label:'GIOCA DENTRO',risk:'low',qte:'timing',stat:'passing',base:.69,sceneAction:'inside',continueBuild:true,desc:'Trovi un compagno tra le linee.'},
+   {label:'SOVRAPPOSIZIONE',risk:'mid',qte:'timing',stat:'passing',base:.61,sceneAction:'overlap',continueBuild:true,desc:'Aspetti il movimento esterno e lo servi sulla corsa.'},
+   {label:'CONDUCI',risk:'mid',qte:'sequence',stat:'dribbling',base:.60,sceneAction:'carry',continueBuild:true,desc:'Porti palla finché il difensore non deve uscire.'}
+  ]:[
+   {label:'APRI SULLA FASCIA',risk:'low',qte:'timing',stat:'passing',base:.70,sceneAction:'switch',continueBuild:true,desc:'Allarghi il campo e costringi la difesa a scivolare.'},
+   {label:'GIOCA TRA LE LINEE',risk:'mid',qte:'timing',stat:'passing',base:.61,sceneAction:'inside',continueBuild:true,desc:'Cerchi il compagno alle spalle del centrocampo.'},
+   {label:'PORTA PALLA',risk:'mid',qte:'sequence',stat:'dribbling',base:.59,sceneAction:'carry',continueBuild:true,desc:'Avanzi palla al piede senza forzare una conclusione.'}
+  ];
+ }else if(ctx.zone==='TREQUARTI'){
+  choices=wide?[
+   {label:'VAI SUL FONDO',risk:'mid',qte:'sequence',stat:'dribbling',base:.58,sceneAction:'overlap',continueBuild:true,desc:'Attacchi il lato esterno per guadagnare il fondo.'},
+   {label:'PASSAGGIO DENTRO',risk:'low',qte:'timing',stat:'passing',base:.66,sceneAction:'inside',continueBuild:true,desc:'Servi chi si muove tra terzino e centrale.'},
+   {label:natural?'TAGLIA DENTRO':'RIENTRA SUL PIEDE FORTE',risk:'mid',qte:'sequence',stat:'technique',base:.58,sceneAction:'carry',continueBuild:true,desc:'Porti la palla verso una zona più pericolosa.'}
+  ]:[
+   {label:'SPONDA',risk:'low',qte:'timing',stat:'passing',base:.68,sceneAction:'support',continueBuild:true,desc:'Fai proseguire l’azione a chi arriva fronte alla porta.'},
+   {label:'FILTRANTE',risk:'high',qte:'timing',stat:'passing',base:.54,sceneAction:'through',continueBuild:true,desc:'Attacchi lo spazio alle spalle della linea.'},
+   {label:'PUNTA IL DIFENSORE',risk:'mid',qte:'sequence',stat:'dribbling',base:.57,sceneAction:'carry',continueBuild:true,desc:'Costringi il centrale a scegliere se uscire.'}
+  ];
+ }else{
+  choices=wide?[
+   {label:'CROSS TESO',risk:'mid',qte:'timing',stat:'crossing',base:.60,sceneAction:'cross',desc:'Palla forte dentro l’area.'},
+   {label:'PALLA DIETRO',risk:'low',qte:'timing',stat:'passing',base:.67,sceneAction:'ground',desc:'Cerchi chi arriva a rimorchio.'},
+   {label:natural?'ATTACCA IL PRIMO PALO':'RIENTRA E CALCIA',risk:'high',qte:'aim',stat:'shooting',base:.52,shot:true,shotBonus:.03,desc:natural?'Conclusione da posizione stretta.':'Rientri sul piede forte e cerchi l’angolo lontano.'}
+  ]:[
+   {label:'SPONDA DI PRIMA',risk:'low',qte:'timing',stat:'passing',base:.68,sceneAction:'ground',desc:'Scarico per il compagno che arriva.'},
+   {label:'GIRATI E CALCIA',risk:'mid',qte:'aim',stat:'shooting',base:.58,shot:true,shotBonus:.02,desc:'Se riesci a girarti hai subito la porta davanti.'},
+   {label:'ULTIMO PASSAGGIO',risk:'high',qte:'timing',stat:'passing',base:.54,sceneAction:'through',desc:'Cerchi il taglio dentro l’area.'}
+  ];
+ }
+ return {ctx,choices};
+}
 function showRouteChoices(opt,touch){
- let wide=opt.lane!=='centre',natural=(opt.lane==='left'&&opt.foot==='L')||(opt.lane==='right'&&opt.foot==='R');
- let choices=wide?[
-   {label:'CROSS TESO',risk:'mid',qte:'timing',stat:'crossing',base:.60,sceneAction:'cross',desc:'Attacca l’area con una palla tesa.'},
-   {label:'PASSAGGIO RASOTERRA',risk:'low',qte:'timing',stat:'passing',base:.67,sceneAction:'ground',desc:'Palla dietro la linea difensiva verso il centro.'},
-   {label:natural?'VAI SUL FONDO E TIRA':'RIENTRA E TIRA',risk:'high',qte:'aim',stat:'shooting',base:.52,shot:true,shotBonus:.03,desc:natural?'Attacchi il fondo e concludi da posizione stretta.':'Rientri sul piede forte e cerchi il secondo palo.'}
- ]:[
-   {label:'SPONDA DI PRIMA',risk:'low',qte:'timing',stat:'passing',base:.68,sceneAction:'ground',desc:'Scarico rapido per chi arriva fronte alla porta.'},
-   {label:'GIRATI E TIRA',risk:'mid',qte:'aim',stat:'shooting',base:.58,shot:true,shotBonus:.02,desc:'Proteggi palla, ti giri e concludi.'},
-   {label:'FILTRANTE',risk:'high',qte:'timing',stat:'passing',base:.54,sceneAction:'through',desc:'Cerchi il taglio alle spalle della linea.'}
- ];
- state.activeMoment={...state.activeMoment,stages:[{choices}]};state.chain.stage=0;refs.chainStep.textContent='SVILUPPO · '+(wide?'FASCIA':'ZONA CENTRALE');
- refs.momentText.innerHTML=`${opt.player.name} ha controllato. ${wide?'Sei sulla fascia: cross, palla bassa o attacco interno.':'Sei tra le linee: sponda, tiro o filtrante.'}`;
- refs.choices.innerHTML=choices.map((c,i)=>`<button class="choice risk-${c.risk}" data-i="${i}">${String.fromCharCode(65+i)} · ${c.label}<small>${c.desc}</small><span class="choice-meta">${String(c.stat).toUpperCase()} ${Math.round(actorStat(opt.player,c.stat))} · DIFFICOLTÀ ${riskName(c.risk)}</span></button>`).join('');
+ let {ctx,choices}=contextualRouteChoices(opt);state.chain.buildCount=(state.chain.buildCount||0)+1;
+ state.activeMoment={...state.activeMoment,stages:[{choices}]};state.chain.stage=0;
+ refs.chainStep.textContent=`${ctx.zone} · ${Math.round(ctx.distanceToGoal)} M DALLA PORTA`;
+ const pressure=ctx.pressure<4?'sotto pressione':ctx.pressure<7?'con un avversario vicino':'con spazio';
+ refs.momentTitle.textContent=ctx.zone==='AREA'?'ULTIMA GIOCATA':ctx.zone==='TREQUARTI'?'ATTACCO POSIZIONALE':'COSTRUZIONE';
+ refs.momentText.textContent=`${opt.player.name} riceve ${pressure}. Scegli una soluzione coerente con la posizione.`;
+ refs.lowerThirdTitle.textContent=opt.player.name.toUpperCase();
+ refs.commentary.textContent=ctx.zone==='AREA'?'È una zona da cui si può fare male.':ctx.zone==='TREQUARTI'?'La difesa deve decidere se uscire.':'La manovra continua: niente forzature.';
+ refs.choices.innerHTML=choices.map((c,i)=>`<button class="choice risk-${c.risk}" data-i="${i}">${String.fromCharCode(65+i)} · ${c.label}<small>${c.desc}</small><span class="choice-meta">${String(c.stat).toUpperCase()} ${Math.round(actorStat(opt.player,c.stat))}</span></button>`).join('');
  refs.decision.classList.remove('hidden');document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
 }
+
 function showFinalBallFinish(kind){
  let fin=bestPlayer(state.team.id,'attack');state.chain.actor=fin;refs.actorName.textContent=fin.name;refs.actorInfo.textContent=`${fin.pos} · OVR ${fin.overall}`;refs.chainStep.textContent='ULTIMO TOCCO';refs.momentText.textContent=kind==='cross'?'Il cross arriva nella zona calda. Devi finalizzare.':'La palla bassa attraversa la difesa. Arriva il compagno.';
  let choices=[
@@ -174,12 +223,12 @@ function defenderOptions(){
  return picks.slice(0,3).map((p,i)=>({num:i+1,player:p,sceneIndex:[2,3,6][i],role:i===0?'CENTRALE':i===1?'ESTERNO':'MEDIANO'}));
 }
 function showDefenderSelection(){
- let opts=defenderOptions();state.chain.defenderOptions=opts;refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');refs.chainStep.textContent='FASE 1 · CHI ESCE?';refs.momentText.textContent='Scegli chi deve uscire sul portatore. La linea si muoverà in base alla tua scelta.';refs.commentary.textContent='DIFESA: premi 1, 2, 3 oppure tocca il difensore.';refs.receiverHint.textContent='CHI ESCE A DIFENDERE? · 1 / 2 / 3';refs.receiverHint.classList.remove('hidden');S9Scene.beginDefenderSelection(opts,opt=>{refs.receiverHint.classList.add('hidden');onDefenderChosen(opt)})
+ let opts=defenderOptions();state.chain.defenderOptions=opts;refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');refs.chainStep.textContent='CHI ROMPE LA LINEA?';refs.momentText.textContent='Scegli il difensore che esce sul portatore: gli altri dovranno coprire lo spazio lasciato.';refs.lowerThirdTitle.textContent='FASE DIFENSIVA';refs.commentary.textContent='L’avversario punta la porta. Decidi chi esce e chi resta in copertura.';refs.receiverHint.textContent='CHI ESCE? · 1 / 2 / 3';refs.receiverHint.classList.remove('hidden');S9Scene.beginDefenderSelection(opts,opt=>{refs.receiverHint.classList.add('hidden');onDefenderChosen(opt)})
 }
 function onDefenderChosen(opt){
  state.chain.actor=opt.player;refs.actorName.textContent=opt.player.name;refs.actorInfo.textContent=`${opt.player.pos} · OVR ${opt.player.overall}`;let kind=state.activeMoment.kind;let fit=kind==='cross'?(opt.role==='ESTERNO'?8:opt.role==='CENTRALE'?4:-2):(opt.role==='CENTRALE'?8:opt.role==='MEDIANO'?4:-9);state.chain.defenseShape=fit;refs.commentary.textContent=fit<0?'ATTENZIONE: l’uscita apre un corridoio alle spalle.':'La linea scivola e copre l’uscita.';S9Scene.commitDefender(opt,fit).then(()=>showStage(0))
 }
-function nextMoment(){if(state.moment>=state.totalMoments)return finishMatch();state.moment++;let minute=Math.round(7+state.moment*(74/(state.totalMoments+1))+Math.random()*6);refs.clock.textContent=minute+"'";refs.momentCount.textContent=`MOMENTO ${state.moment}/${state.totalMoments}`;ambientSim(Math.max(1,minute-4));let m=state.moment===1?MOMENTS.find(x=>x.kind==='counter'):weightedMoment(minute);state.usedKinds.push(m.kind);state.activeMoment=m;state.chain={stage:0,quality:0,actor:null,opponent:null,firstChoice:null};let actorTeam=m.def?state.team.id:state.team.id;let oppId=oppTeam().id;state.chain.actor=bestPlayer(actorTeam,m.actor);state.chain.opponent=bestPlayer(oppId,m.opponent);refs.momentType.textContent='MOMENTO CHIAVE · '+m.type;refs.momentTitle.textContent=m.title;refs.momentText.textContent=m.text;refs.actorName.textContent=state.chain.actor.name;refs.actorInfo.textContent=`${state.chain.actor.pos} · OVR ${state.chain.actor.overall}`;refs.chainStep.textContent=m.stages.length>1?'FASE 1 / 2':'FASE DECISIVA';refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');refs.cameraLabel.textContent='CAMERA · LIVE';refs.lowerThirdTitle.textContent='AZIONE SALIENTE';refs.commentary.textContent='AZIONE IN SVILUPPO...';S9Scene.playLeadIn(m,userIsHome()).then(()=>{refs.cameraLabel.textContent='CAMERA · FREEZE';refs.commentary.textContent='AZIONE SALIENTE: adesso scegli tu.';if(m.def)showDefenderSelection();else if(shouldUseReceiverPhase(m))showReceiverSelection();else showStage(0)})}
+function nextMoment(){if(state.moment>=state.totalMoments)return finishMatch();state.moment++;let minute=Math.round(7+state.moment*(74/(state.totalMoments+1))+Math.random()*6);refs.clock.textContent=minute+"'";refs.momentCount.textContent=`MOMENTO ${state.moment}/${state.totalMoments}`;ambientSim(Math.max(1,minute-4));let m=state.moment===1?MOMENTS.find(x=>x.kind==='counter'):weightedMoment(minute);state.usedKinds.push(m.kind);state.activeMoment=m;state.chain={stage:0,quality:0,actor:null,opponent:null,firstChoice:null};let actorTeam=m.def?state.team.id:state.team.id;let oppId=oppTeam().id;state.chain.actor=bestPlayer(actorTeam,m.actor);state.chain.opponent=bestPlayer(oppId,m.opponent);refs.momentType.textContent='MOMENTO CHIAVE · '+m.type;refs.momentTitle.textContent=m.title;refs.momentText.textContent=m.text;refs.actorName.textContent=state.chain.actor.name;refs.actorInfo.textContent=`${state.chain.actor.pos} · OVR ${state.chain.actor.overall}`;refs.chainStep.textContent=m.stages.length>1?'FASE 1 / 2':'FASE DECISIVA';refs.decision.classList.add('hidden');refs.qte.classList.add('hidden');refs.outcomeBreakdown.classList.add('hidden');refs.cameraLabel.textContent='CAMERA · LIVE';refs.lowerThirdTitle.textContent='TELECRONACA';refs.commentary.textContent='La manovra prende forma...';S9Scene.playLeadIn(m,userIsHome()).then(()=>{refs.cameraLabel.textContent='CAMERA · FREEZE';refs.commentary.textContent=m.def?'Pericolo: devi leggere l’uscita giusta.':'Si apre una possibilità: ora la scelta è tua.';if(m.def)showDefenderSelection();else if(shouldUseReceiverPhase(m))showReceiverSelection();else showStage(0)})}
 function riskName(r){return r==='low'?'BASSA':r==='high'?'ALTA':'MEDIA'}
 function showStage(index){let m=state.activeMoment,stage=m.stages[index];state.chain.stage=index;refs.momentText.textContent=stage.text||m.text;refs.chainStep.textContent=m.stages.length>1?`FASE ${index+1} / ${m.stages.length}`:(stage.emergency?'FASE DIFENSIVA':'FASE DECISIVA');refs.choices.innerHTML=stage.choices.map((c,i)=>{let st=actorStat(state.chain.actor,c.stat);return `<button class="choice risk-${c.risk||'mid'}" data-i="${i}">${String.fromCharCode(65+i)} · ${c.label}<small>${c.desc||''}</small><span class="choice-meta">${String(c.stat||'abilità').toUpperCase()} ${Math.round(st)} · DIFFICOLTÀ ${riskName(c.risk)}</span></button>`}).join('');refs.decision.classList.remove('hidden');document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>choose(+b.dataset.i))}
 function hideQteModes(){[refs.qteTiming,refs.qteSequence,refs.qteAim,refs.qteReaction,refs.qteHold,refs.qteSetPiece].forEach(x=>x&&x.classList.add('hidden'))}
@@ -254,24 +303,28 @@ function opponentShotOutcome(){
  return {goal:shotScore>=target,shotScore,target,attack,keeper,att,gk};
 }
 function factorRow(label,value){value=Math.round(clamp(value,0,100));return `<div class="factor-row"><span>${label}</span><b>${value}</b><span class="factor-track"><span class="factor-fill" style="width:${value}%"></span></span></div>`}
-function showOutcome(title,kind,factors,equation){refs.outcomeTitle.textContent=title;refs.outcomeTitle.className='outcome-title '+kind;refs.outcomeFactors.innerHTML=factors.map(x=>factorRow(x[0],x[1])).join('');refs.outcomeEquation.innerHTML=equation;refs.outcomeBreakdown.classList.remove('hidden')}
+function showOutcome(title,kind,factors,equation){refs.outcomeTitle.textContent=title;refs.outcomeTitle.className='outcome-title '+kind;refs.outcomeFactors.innerHTML=factors.map(x=>factorRow(x[0],x[1])).join('');refs.outcomeEquation.innerHTML=equation;refs.outcomeBreakdown.classList.add('hidden')}
 function explainChoice(res,c,q){let f=[[c.stat.toUpperCase(),res.stat],['QTE '+q.timing,res.qs],['QUALITÀ SCELTA',res.tactical],['PRESSIONE AVVERSARIA',res.oppStat]];if(state.activeMoment.def)f.push(['STRUTTURA DIFENSIVA',clamp(70+(res.shapePts||0)*3,20,99)]);showOutcome(res.ok?'GIOCATA RIUSCITA':'GIOCATA FALLITA',res.ok?'ok':'fail',f,`Valore azione <b>${res.execution}</b> · soglia richiesta <b>${res.threshold}</b>. ${res.ok?'Hai superato la soglia.':'Non hai raggiunto la soglia.'}`)}
 function explainShot(out,q){showOutcome(out.goal?'GOL':'CONCLUSIONE RESPINTA',''+(out.goal?'ok':'neutral'),[['TIRO',out.shooting],['TECNICA',out.technique],['QTE '+q.timing,out.qs],['PORTIERE',out.keeper]],`Qualità conclusione <b>${out.shotScore}</b> · valore da battere <b>${out.keeperTarget}</b>. ${out.goal?'La conclusione supera il portiere.':out.miss+'.'}`)}
 function explainOpponentShot(out){showOutcome(out.goal?'GOL SUBITO':'PORTA SALVA',out.goal?'fail':'ok',[['ATTACCANTE',out.attack],['PERICOLOSITÀ',Math.round((state.activeMoment.threat||.44)*100)],['TUO PORTIERE',out.keeper]],`Qualità tiro avversario <b>${out.shotScore}</b> · soglia portiere <b>${out.target}</b>.`)}
 function resolveQte(){let q=state.qte;if(!q)return;refs.qte.classList.add('hidden');hideQteModes();let c=state.chain.currentChoice,m=state.activeMoment,minute=refs.clock.textContent,res=choiceSuccess(c,q);state.chain.quality=clamp(state.chain.quality+q.quality+(res.ok?.05:-.07),-.18,.20);explainChoice(res,c,q);
  if(m.def){
-   if(res.ok){S9Scene.resolveMoment(m,'defended',true).then(()=>{refs.commentary.textContent=`✓ ${q.timing} · ${c.label}: ${state.chain.actor.name} chiude l'azione.`;state.events.push(`${minute} ${state.chain.actor.name}: intervento difensivo riuscito`);state.qte=null;setTimeout(nextMoment,2200)})}
+   if(res.ok){S9Scene.resolveMoment(m,'defended',true).then(()=>{refs.commentary.textContent=`${state.chain.actor.name} chiude bene e spegne l’azione.`;state.events.push(`${minute} ${state.chain.actor.name}: intervento difensivo riuscito`);state.qte=null;setTimeout(nextMoment,2200)})}
    else{
-     refs.commentary.textContent=`! ${q.timing} · ${c.label}: l'avversario riesce a passare. Ultima possibilità!`;
+     refs.commentary.textContent=`L’uscita non basta: l’attaccante entra ancora più vicino alla porta.`;
      state.qte=null;setTimeout(()=>showEmergencyDefense(),650)
    }
    return;
  }
  if(c.sceneAction&&res.ok){
-   S9Scene.resolveRoute(c.sceneAction).then(()=>{refs.commentary.textContent=`✓ ${q.timing} · ${c.label}: la palla arriva nella zona scelta.`;state.qte=null;setTimeout(()=>showFinalBallFinish(c.sceneAction==='cross'?'cross':'ground'),420)});return
+   S9Scene.resolveRoute(c.sceneAction).then(()=>{
+    refs.commentary.textContent=`${state.chain.actor.name} esegue la giocata.`;state.qte=null;
+    if(c.continueBuild){setTimeout(()=>showReceiverSelection(),520)}
+    else setTimeout(()=>showFinalBallFinish(c.sceneAction==='cross'?'cross':'ground'),420)
+   });return
  }
  if(c.sceneAction&&!res.ok){
-   S9Scene.loseRoute(c.sceneAction).then(()=>{refs.commentary.textContent=`✗ ${q.timing} · ${c.label}: linea letta dalla difesa.`;state.qte=null;triggerTurnover('PASSAGGIO INTERCETTATO: l’avversario riparte.')} );return
+   S9Scene.loseRoute(c.sceneAction).then(()=>{refs.commentary.textContent=`La difesa legge ${c.label.toLowerCase()} e recupera palla.`;state.qte=null;triggerTurnover('PASSAGGIO INTERCETTATO: l’avversario riparte.')} );return
  }
  if(c.shot){
    if(!res.ok){S9Scene.resolveMoment(m,'miss',false).then(()=>{refs.commentary.textContent=`✗ ${q.timing} · ${c.label}: la giocata si sporca e non arriva una vera conclusione.`;state.events.push(`${minute} Occasione sfumata`);state.qte=null;setTimeout(nextMoment,2200)});return}
@@ -298,7 +351,7 @@ function resolveEmergency(){let q=state.qte,c=state.chain.currentChoice;refs.qte
 function simulateOtherGame(h,a){let edge=(h.strength-a.strength)/20;let hg=Math.max(0,Math.round(rand(0,.95)+Math.max(0,edge)*.45+Math.random()*.85));let ag=Math.max(0,Math.round(rand(0,.85)+Math.max(0,-edge)*.45+Math.random()*.80));return [hg,ag]}
 function applyResult(h,a,hg,ag){let H=state.table[h.id],A=state.table[a.id];H.p++;A.p++;H.gf+=hg;H.ga+=ag;A.gf+=ag;A.ga+=hg;if(hg>ag){H.w++;A.l++;H.pts+=3}else if(ag>hg){A.w++;H.l++;A.pts+=3}else{H.d++;A.d++;H.pts++;A.pts++}}
 function finishMatch(){refs.clock.textContent="90'";for(let [h,a] of state.fixtures[state.round]){if(h.id===state.current.h.id&&a.id===state.current.a.id)applyResult(h,a,state.homeGoals,state.awayGoals);else{let [hg,ag]=simulateOtherGame(h,a);applyResult(h,a,hg,ag)}}refs.resultRound.textContent='GIORNATA '+(state.round+1);refs.resultScore.textContent=`${state.current.h.name} ${state.homeGoals} - ${state.awayGoals} ${state.current.a.name}`;refs.resultSummary.innerHTML=`Momenti giocati: <b>${state.totalMoments}</b><br>${state.events.slice(-7).join('<br>')||'Partita senza eventi registrati.'}`;state.round++;save();show('screenResult')}
-function save(){localStorage.setItem('s9moments3d_v16',JSON.stringify({team:state.team?.id,round:state.round,table:state.table}))}
+function save(){localStorage.setItem('s9moments3d_v18',JSON.stringify({team:state.team?.id,round:state.round,table:state.table}))}
 
 const S9Scene=(()=>{
  const G=window.S9Football3D,canvas=refs.canvas,ctx=canvas.getContext('2d');let raf=0,last=0,homeKit={shirt:'#173f86',shorts:'#111',socks:'#173f86'},awayKit={shirt:'#eee',shorts:'#222',socks:'#eee'};let players=[],ball={x:52.5,z:34,y:.28},targetBall={x:52.5,z:34,y:.28},cam={x:52.5,z:34,attackDir:1,tight:1},moment=null,choice=null,anim=null,receiverSelect=null,stopState=null,lastProjection=null;
@@ -316,7 +369,30 @@ const S9Scene=(()=>{
   else if(m.kind==='cross'){const bx=attackSide==='home'?88:17,bz=attackSide==='home'?10:58;targetBall={x:bx,z:bz,y:lead?.35:.9};set(attackSide,8,bx-dir*1,bz);set(attackSide,9,attackSide==='home'?94:11,31);set(attackSide,10,attackSide==='home'?91:14,41);set(defendSide,2,attackSide==='home'?92:13,30);set(defendSide,3,attackSide==='home'?93:12,40);set(defendSide,0,attackSide==='home'?101:4,34);cam.tight=1.52}
   else{const bx=attackSide==='home'?92:13,bz=35;targetBall={x:bx,z:bz,y:.35};set(attackSide,9,bx-dir*2,bz);set(attackSide,10,bx-dir*7,bz+8);set(defendSide,2,bx+dir*3,bz-4);set(defendSide,3,bx+dir*4,bz+5);set(defendSide,0,attackSide==='home'?101:4,34);cam.tight=1.78}
  }
- function playLeadIn(m,userHome){configureMoment(m,userHome,true);return new Promise(resolve=>{setTimeout(()=>{configureMoment(m,userHome,false);setTimeout(resolve,m.kind==='freekick'?700:1450)},m.kind==='freekick'?300:350)})}
+ function playLeadIn(m,userHome){
+  configureMoment(m,userHome,true);
+  ball={...targetBall};targetBall={...ball};
+  if(m.kind==='freekick'||m.kind==='penalty')return new Promise(resolve=>setTimeout(()=>{configureMoment(m,userHome,false);setTimeout(resolve,900)},520));
+  return new Promise(resolve=>setTimeout(async()=>{
+    const startPos={...ball};configureMoment(m,userHome,false);const dest={...targetBall};ball={...startPos};targetBall={...startPos};
+    await runBallAnim(dest,m.kind==='counter'?1850:1650,m.kind==='cross'?1.25:.16);targetBall={...dest};setTimeout(resolve,420)
+  },520))
+ }
+ function kickoffSequence(userHome){
+  moment=null;choice=null;receiverSelect=null;cam.x=52.5;cam.z=34;cam.attackDir=1;cam.tight=1.08;
+  players.forEach(p=>{const f=formations[p.side][p.i];p.tx=f[0];p.tz=f[1]});
+  const kickSide=Math.random()<.5?'home':'away',dir=kickSide==='home'?1:-1,opp=kickSide==='home'?'away':'home';cam.attackDir=dir;
+  const p9=playerFor(kickSide,9),p10=playerFor(kickSide,10),mid=playerFor(kickSide,6);if(p9){p9.tx=52.5-dir*.8;p9.tz=33}if(p10){p10.tx=52.5-dir*2.4;p10.tz=35}if(mid){mid.tx=52.5-dir*10;mid.tz=29}
+  ball={x:52.5,z:34,y:.28};targetBall={...ball};
+  return new Promise(async resolve=>{await new Promise(r=>setTimeout(r,650));let a={x:52.5-dir*3.2,z:35,y:.28};await runBallAnim(a,520,.08);if(p10){p10.tx=a.x;p10.tz=a.z}players.filter(p=>p.side===kickSide&&p.i!==0).forEach((p,i)=>{p.tx=clamp(p.tx+dir*(2.5+(i%3)),2,103)});await new Promise(r=>setTimeout(r,380));let b={x:52.5-dir*11,z:29,y:.28};await runBallAnim(b,760,.10);if(mid){mid.tx=b.x;mid.tz=b.z}await new Promise(r=>setTimeout(r,700));resolve()})
+ }
+ function getReceiverContext(opt){
+  const side=moment?.userHome?'home':'away',pl=playerFor(side,opt.sceneIndex),dir=side==='home'?1:-1,goalX=side==='home'?105:0;
+  const x=pl?.x??ball.x,z=pl?.z??ball.z,distanceToGoal=Math.abs(goalX-x),wide=z<21||z>47;
+  let zone=distanceToGoal>62?'COSTRUZIONE':distanceToGoal>40?'CENTROCAMPO':distanceToGoal>22?'TREQUARTI':'AREA';
+  let defenders=players.filter(p=>p.side!==side&&p.i!==0),pressure=defenders.length?Math.min(...defenders.map(d=>Math.hypot(d.x-x,d.z-z))):10;
+  return {x,z,dir,goalX,distanceToGoal,wide,zone,pressure};
+ }
  function commitChoice(m,c){choice=c;const attackSide=m.def?(moment.userHome?'away':'home'):(moment.userHome?'home':'away'),dir=attackSide==='home'?1:-1;let carrier=players.find(p=>p.side===attackSide&&p.i===9);if(carrier){carrier.tx=targetBall.x-dir*1.2;carrier.tz=targetBall.z}targetBall.y=.32}
  function resolveIntermediate(m,c){return new Promise(resolve=>{const attackSide=m.def?(moment.userHome?'away':'home'):(moment.userHome?'home':'away'),dir=attackSide==='home'?1:-1;let from={...ball},to={x:clamp(ball.x+dir*9,3,102),z:clamp(ball.z+(Math.random()-.5)*10,5,63),y:.32};anim={start:performance.now(),duration:650,from,to,done:()=>{targetBall={...to};resolve()}}})}
  function runBallAnim(to,duration=800,arc=1.2){return new Promise(resolve=>{anim={start:performance.now(),duration,from:{...ball},to:{...to},arc,done:resolve}})}
@@ -326,8 +402,8 @@ const S9Scene=(()=>{
    const attackSide=moment.userHome?'home':'away',dir=attackSide==='home'?1:-1;
    receiverSelect={opts,cb,attackSide};refs.receiverOverlay.innerHTML='';refs.receiverOverlay.classList.remove('hidden');
    // Three deliberately different routes: wide left, central run, wide right.
-   const carrier=playerFor(attackSide,9),baseX=carrier?.x??ball.x;
-   opts.forEach(o=>{let pl=playerFor(attackSide,o.sceneIndex);if(!pl)return;let x=baseX+dir*(o.lane==='centre'?10:7),z=o.lane==='left'?15:o.lane==='right'?53:34;pl.tx=x;pl.tz=z;let b=document.createElement('button');b.className='receiver-marker';b.type='button';b.dataset.num=o.num;b.innerHTML=`${o.num}<small>${o.player.name.split(' ').slice(-1)[0]}</small>`;b.onclick=e=>{e.stopPropagation();pickReceiver(o.num)};refs.receiverOverlay.appendChild(b);o.el=b});
+   const candidates=players.filter(p=>p.side===attackSide&&p.i!==0),carrier=[...candidates].sort((a,b)=>Math.hypot(a.x-ball.x,a.z-ball.z)-Math.hypot(b.x-ball.x,b.z-ball.z))[0],baseX=ball.x;if(carrier){carrier.tx=ball.x;carrier.tz=ball.z}
+   opts.forEach(o=>{let pl=playerFor(attackSide,o.sceneIndex);if(!pl)return;let forward=o.lane==='centre'?9:6.5,x=clamp(baseX+dir*forward,4,101),z=o.lane==='left'?clamp(ball.z-14,6,28):o.lane==='right'?clamp(ball.z+14,40,62):clamp(ball.z+(ball.z<34?3:-3),24,44);pl.tx=x;pl.tz=z;let b=document.createElement('button');b.className='receiver-marker';b.type='button';b.dataset.num=o.num;b.innerHTML=`${o.num}<small>${o.player.name.split(' ').slice(-1)[0]}</small>`;b.onclick=e=>{e.stopPropagation();pickReceiver(o.num)};refs.receiverOverlay.appendChild(b);o.el=b});
  }
  function beginDefenderSelection(opts,cb){
    const userSide=moment.userHome?'home':'away';receiverSelect={opts,cb,attackSide:userSide,mode:'def'};refs.receiverOverlay.innerHTML='';refs.receiverOverlay.classList.remove('hidden');opts.forEach(o=>{let pl=playerFor(userSide,o.sceneIndex);if(!pl)return;let b=document.createElement('button');b.className='receiver-marker defender-marker';b.type='button';b.dataset.num=o.num;b.innerHTML=`${o.num}<small>${o.role}</small>`;b.onclick=e=>{e.stopPropagation();pickReceiver(o.num)};refs.receiverOverlay.appendChild(b);o.el=b})
@@ -360,8 +436,13 @@ const S9Scene=(()=>{
  function resolveRoute(kind){
    const attackSide=moment.userHome?'home':'away',dir=attackSide==='home'?1:-1;
    if(kind==='cross')return runBallAnim({x:attackSide==='home'?94:11,z:34,y:1.15},940,3.4);
-   if(kind==='through')return runBallAnim({x:clamp(ball.x+dir*15,3,102),z:34,y:.28},820,.18);
-   return runBallAnim({x:clamp(ball.x+dir*11,3,102),z:34,y:.28},760,.12)
+   if(kind==='through')return runBallAnim({x:clamp(ball.x+dir*14,3,102),z:clamp(ball.z+(ball.z<34?5:-5),8,60),y:.28},820,.18);
+   if(kind==='switch')return runBallAnim({x:clamp(ball.x+dir*7,3,102),z:ball.z<34?53:15,y:.55},880,1.15);
+   if(kind==='inside')return runBallAnim({x:clamp(ball.x+dir*9,3,102),z:34,y:.28},760,.12);
+   if(kind==='overlap')return runBallAnim({x:clamp(ball.x+dir*11,3,102),z:clamp(ball.z+(ball.z<34?-5:5),5,63),y:.28},790,.10);
+   if(kind==='support')return runBallAnim({x:clamp(ball.x-dir*4,3,102),z:clamp(34+(ball.z-34)*.7,6,62),y:.28},620,.08);
+   if(kind==='carry')return runBallAnim({x:clamp(ball.x+dir*8,3,102),z:clamp(ball.z+(ball.z<34?1.5:-1.5),4,64),y:.28},760,.06);
+   return runBallAnim({x:clamp(ball.x+dir*10,3,102),z:34,y:.28},760,.12)
  }
  function loseRoute(kind){const attackSide=moment.userHome?'home':'away',dir=attackSide==='home'?1:-1;return runBallAnim({x:clamp(ball.x+dir*6,3,102),z:clamp(ball.z+(kind==='cross'?9:3),3,65),y:.35},620,kind==='cross'?1.8:.12)}
  function resolveMoment(m,outcome,isDef){return new Promise(async resolve=>{
@@ -437,7 +518,7 @@ const S9Scene=(()=>{
   const circ=[];for(let i=0;i<=48;i++){const a=i/48*Math.PI*2;circ.push([52.5+9.15*Math.cos(a),.04,34+9.15*Math.sin(a)])}line(circ);
   // technical areas
   line([[30,.03,0],[30,.03,5],[45,.03,5],[45,.03,0]]);line([[60,.03,0],[60,.03,5],[75,.03,5],[75,.03,0]]);
-  const goal=(x,dir)=>{const z1=30.34,z2=37.66;s.box([x,2.44,34],[.10,.10,7.32],'#f3f5ee');s.box([x,1.22,z1],[.10,2.44,.10],'#f3f5ee');s.box([x,1.22,z2],[.10,2.44,.10],'#f3f5ee');s.box([x-dir*2.15,.08,34],[.08,.08,7.32],'#cfd5ce')};goal(0,-1);goal(105,1)
+  const goal=(x,dir)=>{const z1=30.34,z2=37.66;s.box([x,2.44,34],[.10,.10,7.32],'#f3f5ee');s.box([x,1.22,z1],[.10,2.44,.10],'#f3f5ee');s.box([x,1.22,z2],[.10,2.44,.10],'#f3f5ee');s.box([x-dir*2.15,.08,34],[.08,.08,7.32],'#cfd5ce')};goal(0,1);goal(105,-1)
  }
  function drawGoalNets(p){
   const net=(x,dir)=>{const z1=30.34,z2=37.66,back=x-dir*2.15;ctx.save();ctx.strokeStyle='rgba(232,238,230,.48)';ctx.lineWidth=Math.max(.55,canvas.width/2100);
@@ -445,7 +526,7 @@ const S9Scene=(()=>{
    for(let i=0;i<=7;i++){let z=z1+(z2-z1)*i/7;l([x,0,z],[back,0,z]);l([x,2.44,z],[back,.12,z])}
    for(let i=0;i<=5;i++){let y=2.44*i/5;l([x,y,z1],[back,y*.12,z1]);l([x,y,z2],[back,y*.12,z2])}
    for(let i=0;i<=7;i++){let z=z1+(z2-z1)*i/7;l([back,.12,z],[back,.12,z+(i%2?.02:-.02)])}
-   ctx.restore()};net(0,-1);net(105,1)
+   ctx.restore()};net(0,1);net(105,-1)
  }
  function attackSideGoalX(userHome,isDef){let attackSide=isDef?(userHome?'away':'home'):(userHome?'home':'away');return attackSide==='home'?105:0}
  function render(now){resize();const dt=Math.min(.05,(now-last)/1000||.016);last=now;ctx.clearRect(0,0,canvas.width,canvas.height);const sky=ctx.createLinearGradient(0,0,0,canvas.height);sky.addColorStop(0,'#111917');sky.addColorStop(.58,'#07110d');sky.addColorStop(1,'#030706');ctx.fillStyle=sky;ctx.fillRect(0,0,canvas.width,canvas.height);players.forEach(pl=>{const dx=pl.tx-pl.x,dz=pl.tz-pl.z,dist=Math.hypot(dx,dz);pl.x+=dx*Math.min(1,dt*2.3);pl.z+=dz*Math.min(1,dt*2.3);if(dist>.02){pl.phase+=dt*7;pl.angle=Math.atan2(dx,dz)}});if(anim){const t=clamp((now-anim.start)/anim.duration,0,1),e=1-Math.pow(1-t,3);ball.x=anim.from.x+(anim.to.x-anim.from.x)*e;ball.z=anim.from.z+(anim.to.z-anim.from.z)*e;ball.y=.28+Math.sin(t*Math.PI)*(anim.arc??1.9)+(anim.to.y-.28)*e;if(t>=1){const done=anim.done;targetBall={...anim.to};anim=null;setTimeout(done,100)}}else{ball.x+=(targetBall.x-ball.x)*Math.min(1,dt*4);ball.z+=(targetBall.z-ball.z)*Math.min(1,dt*4);ball.y+=(targetBall.y-ball.y)*Math.min(1,dt*4)}cam.x+=(ball.x-cam.x)*Math.min(1,dt*1.8);cam.z+=(ball.z-cam.z)*Math.min(1,dt*1.6);const w=canvas.width,h=canvas.height,focusX=clamp(cam.x,8,97),focusZ=34+(cam.z-34)*.55,dir=cam.attackDir||1,tight=cam.tight||1;let eye,target,fov;if(moment&&(moment.kind==='freekick'||moment.kind==='penalty')){eye=[ball.x-dir*8.5,4.8,ball.z+0.3];target=[attackSideGoalX(moment.userHome,moment.def),1.2,34];fov=38}else{eye=[focusX-dir*(18/tight),28/tight,focusZ+54/tight];target=[focusX+dir*(7/tight),.8,focusZ];fov=Math.max(34,43-5*(tight-1))}const p=G.camera(eye,target,w,h,fov),env=G.scene(ctx,p);lastProjection=p;if(receiverSelect){receiverSelect.opts.forEach(o=>{let pl=playerFor(receiverSelect.attackSide,o.sceneIndex);if(pl&&o.el){let q=p([pl.x,2.8,pl.z]);o.el.style.left=(q.x/w*100)+'%';o.el.style.top=(q.y/h*100)+'%';o.el.style.opacity=q.z>.1?'1':'0'}})}if(stopState&&stopState.recv){let q=p([stopState.recv.x,2.0,stopState.recv.z]);refs.stopControl.style.left=(q.x/w*100)+'%';refs.stopControl.style.top=(q.y/h*100)+'%'}drawEnvironment(env,p,now);env.flush();drawCrowd(p);const field=G.scene(ctx,p);drawPitch(field,p);field.flush();drawGoalNets(p);const actors=G.scene(ctx,p);players.forEach(pl=>{const sh=p([pl.x,.02,pl.z]);ctx.fillStyle='rgba(0,12,5,.28)';ctx.beginPath();ctx.ellipse(sh.x,sh.y,Math.max(3,w/225),Math.max(1.4,w/590),0,0,Math.PI*2);ctx.fill();const kit=pl.side==='home'?homeKit:awayKit;G.player(actors,pl.x,pl.z,kit,pl.phase,pl.angle,1.35,String(pl.i===0?1:pl.i+1),pl.i===0)});// Officials: referee, two assistants and bench staff.
@@ -456,7 +537,7 @@ const S9Scene=(()=>{
  for(let i=0;i<5;i++){G.player(actors,33+i*1.5,-1.4,homeKit,0,0,0.82,String(i+12),false);G.player(actors,64+i*1.5,-1.4,awayKit,0,0,0.82,String(i+12),false)}
  actors.flush();const bp=p([ball.x,ball.y,ball.z]),be=p([ball.x+.14,ball.y,ball.z]),br=clamp(Math.hypot(be.x-bp.x,be.y-bp.y),3,18),ground=p([ball.x,.03,ball.z]);const shadowFade=clamp(1-ball.y/7,.16,.62);ctx.fillStyle=`rgba(0,10,4,${shadowFade*.55})`;ctx.beginPath();ctx.ellipse(ground.x,ground.y,br*(1.18+ball.y*.035),br*.48,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f7f6ee';ctx.strokeStyle='#26302d';ctx.lineWidth=Math.max(1,br*.09);ctx.beginPath();ctx.arc(bp.x,bp.y,br,0,Math.PI*2);ctx.fill();ctx.stroke();const spin=(now*.012+ball.x*.16+ball.z*.11);ctx.fillStyle='#26302d';for(let k=0;k<3;k++){let a=spin+k*2.094,rr=br*.44,px=bp.x+Math.cos(a)*rr,py=bp.y+Math.sin(a)*rr*.72;ctx.beginPath();ctx.arc(px,py,Math.max(1.1,br*.18),0,Math.PI*2);ctx.fill()}raf=requestAnimationFrame(render)}
  function frame(t){render(t)}
- return {start,stop,setTeams,reset,playLeadIn,commitChoice,resolveIntermediate,resolveMoment,beginReceiverSelection,beginDefenderSelection,commitDefender,coinToss,cancelReceiverSelection,pickReceiver,passToReceiver,beginFirstTouch,startCounterattack,resolveRoute,loseRoute};
+ return {start,stop,setTeams,reset,playLeadIn,kickoffSequence,getReceiverContext,commitChoice,resolveIntermediate,resolveMoment,beginReceiverSelection,beginDefenderSelection,commitDefender,coinToss,cancelReceiverSelection,pickReceiver,passToReceiver,beginFirstTouch,startCounterattack,resolveRoute,loseRoute};
 })();
 
 function openTeamScreen(){teamPick();show('screenTeam')}
@@ -468,7 +549,7 @@ function gestStart(x,y){gestureStart={x,y,time:performance.now()}}
 function gestEnd(x,y){if(!gestureStart)return;let g=gestureDir(x-gestureStart.x,y-gestureStart.y);gestureStart=null;if(g)handleSequence(g.dir,g.mag)}
 if(refs.swipeArena){refs.swipeArena.addEventListener('pointerdown',e=>{e.preventDefault();gestStart(e.clientX,e.clientY);refs.swipeArena.setPointerCapture?.(e.pointerId)});refs.swipeArena.addEventListener('pointerup',e=>{e.preventDefault();gestEnd(e.clientX,e.clientY)})}
 document.querySelectorAll('[data-react]').forEach(b=>b.addEventListener('click',()=>handleReaction(b.dataset.react)));
-window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')handleReaction('LEFT');if(e.key==='ArrowRight')handleReaction('RIGHT');if(['1','2','3'].includes(e.key))S9Scene.pickReceiver?.(+e.key)});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')handleReaction('LEFT');if(e.key==='ArrowRight')handleReaction('RIGHT');if(['1','2','3'].includes(e.key))S9Scene.pickReceiver?.(+e.key);if(e.key.toLowerCase()==='d'&&e.shiftKey){document.body.classList.toggle('debug-ui');if(document.body.classList.contains('debug-ui'))refs.outcomeBreakdown.classList.remove('hidden')}});
 if(refs.holdBtn){refs.holdBtn.addEventListener('pointerdown',e=>{e.preventDefault();beginHold()});['pointerup','pointercancel','pointerleave'].forEach(ev=>refs.holdBtn.addEventListener(ev,e=>{e.preventDefault();endHold()}))}
 refs.continueBtn.addEventListener('click',()=>{if(state.round>=state.fixtures.length){alert('Fine girone del prototipo 3D.');state.round=0}renderHub();show('screenHub')});
 
