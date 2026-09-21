@@ -1,0 +1,14 @@
+SERIEA 9000 MOMENTS 3D — V13
+
+PROVA PRINCIPALE
+1. Avvia una carriera e gioca la prima partita.
+2. Il primo momento è forzato su un contropiede per mostrare subito il nuovo sistema.
+3. Sopra tre compagni compaiono 1 / 2 / 3.
+4. Clicca il numero sul campo oppure premi 1, 2 o 3.
+5. La palla viaggia nel 3D verso la corsa del compagno.
+6. Quando arriva, clicca STOP nel momento giusto.
+7. Stop perfetto/buono: continui l’azione con opzioni coerenti con fascia o centro.
+8. Stop sbagliato: la palla si allunga, l’avversario recupera e parte un contropiede da difendere.
+9. Un passaggio può anche essere anticipato prima della ricezione se la linea è chiusa.
+
+V13 è una vertical slice della nuova meccanica: passaggio/ricezione/perdita palla sono già collegati al 3D.

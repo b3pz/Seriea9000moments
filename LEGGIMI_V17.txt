@@ -1,0 +1,34 @@
+SERIEA 9000 MOMENTS 3D — V17 SUPER
+===================================
+
+Questa build include integralmente la SUPER V16 + il Visual/Animation Pass V17.
+Non serve installare o copiare la V16 prima.
+
+V16 INCLUSA
+- modalità TV / intro / commentatori / lancio moneta
+- HUD broadcast (score a sx, competizione alto dx, S9 TV basso dx)
+- scelta compagni 1/2/3 nel 3D
+- passaggio, stop, anticipo e contropiede
+- scelta difensore 1/2/3
+- punizioni e rigori: camera dietro + direzione + potenza
+- tiro in movimento con zona porta diretta
+- pubblico, arbitro, assistenti, panchine, roster e classifica
+
+VISUAL PASS V17
+- tribune ridisegnate come superfici inclinate anziché grandi parallelepipedi
+- coperture e strutture dello stadio più leggere
+- pubblico disposto per file sulle gradinate
+- cartelloni pubblicitari sottili
+- panchine aperte con tettoia e sedute, meno effetto “blocco”
+- tunnel centrale
+- reti delle porte disegnate a maglia
+- aree tecniche a bordo campo
+- ombre dei giocatori più morbide
+- ombra pallone legata all'altezza
+- pallone con dettaglio/rotazione visiva durante il movimento
+- marker 1/2/3 più piccoli e puliti
+- HUD TV e pannelli QTE alleggeriti
+
+TEST
+Estrarre tutta la cartella e aprire index.html in Chrome/Edge/Safari.
+Per il test mobile è preferibile servire la cartella via GitHub Pages o un piccolo server HTTP.

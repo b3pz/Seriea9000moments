@@ -1,0 +1,22 @@
+SERIEA 9000 MOMENTS 3D — V16 SUPER BUILD
+
+Novità principali:
+- Presentazione TV completa: intro, commentatori, lancio della moneta, score bug a sinistra,
+  logo competizione in alto a destra, logo S9 TV in basso a destra, lower-third telecronaca.
+- Attacco 1/2/3: selezione del ricevente direttamente sopra i giocatori nel 3D.
+- Ricezione: stop a tempo; stop sbagliato -> anticipo -> contropiede avversario.
+- Difesa 1/2/3: scelta del difensore che esce sul portatore. Una scelta sbagliata può aprire
+  una linea/corridoio e rendere più difficile la chiusura successiva.
+- Punizioni e rigori: camera dedicata da dietro, direzione oscillante da bloccare,
+  poi barra di potenza; abilità del battitore influenza la difficoltà.
+- Tiri in movimento: eliminato il vecchio mirino che si muove da solo. Ora si clicca/tocca
+  direttamente la zona della porta da colpire.
+- Traiettorie collegate alla zona scelta per i tiri e alla direzione bloccata sui piazzati.
+- Ambiente 3D con pubblico, tribune, panchine, arbitro e assistenti ereditato dalla base V13.
+
+Avvio:
+1. Estrarre tutta la cartella.
+2. Aprire index.html.
+3. Su mobile usare touch/swipe; su PC mouse/tastiera.
+
+Sviluppato ed ideato da b3pZ.

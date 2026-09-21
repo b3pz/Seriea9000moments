@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>SerieA 9000 MOMENTS 3D V17</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <section id="screenStart" class="screen active hero">
+    <div class="scan"></div>
+    <img class="logo" src="assets/logo/seriea9000_logo.png" alt="SerieA 9000">
+    <div class="moments-title">MOMENTS</div>
+    <p class="tag">OGNI PARTITA. POCHE AZIONI. OGNI SCELTA CONTA.</p>
+    <button type="button" class="mainbtn" id="startBtn">PREMI START</button>
+    <small>Spin-off 3D · Sviluppato ed ideato da b3pZ</small>
+  </section>
+
+  <section id="screenTeam" class="screen">
+    <header><b>SERIEA 9000 MOMENTS</b><span>NUOVA CARRIERA</span></header>
+    <h1>SCEGLI LA SQUADRA</h1>
+    <div id="teamGrid" class="team-grid"></div>
+  </section>
+
+  <section id="screenHub" class="screen">
+    <header><b id="hubTeam">—</b><span id="hubSeason">STAGIONE 1</span></header>
+    <div class="hub-grid">
+      <div class="panel next">
+        <div class="eyebrow">PROSSIMO LIVELLO</div>
+        <div id="roundLabel" class="level">GIORNATA 1</div>
+        <div id="fixtureCard" class="fixture"></div>
+        <button type="button" class="mainbtn" id="playBtn">GIOCA PARTITA</button>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">CLASSIFICA</div>
+        <div id="table"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenMatch" class="screen match tv-mode">
+    <div class="match-layout tv-full">
+      <div class="broadcast">
+        <canvas id="matchCanvas" width="1280" height="720"></canvas>
+
+        <div id="prematchOverlay" class="prematch-overlay hidden">
+          <div class="prematch-card">
+            <div class="prematch-live">S9 TV · LIVE</div>
+            <div id="prematchCompetition" class="prematch-competition">SERIEA 9000</div>
+            <div id="prematchTitle" class="prematch-title">MATCH DAY</div>
+            <div id="prematchTeams" class="prematch-teams"></div>
+            <div id="prematchSub" class="prematch-sub">COLLEGAMENTO DALLO STADIO</div>
+          </div>
+        </div>
+
+        <div class="tv-scorebug">
+          <div id="clock" class="tv-minute">0'</div>
+          <div class="tv-scoreline"><span id="tvHomeCode">HOME</span><strong id="score">0 - 0</strong><span id="tvAwayCode">AWAY</span></div>
+          <div id="momentCount" class="tv-phase">MOMENTO 0/4</div>
+        </div>
+
+        <div class="competition-bug"><span class="comp-cup">◆</span><b>SERIEA 9000</b><small id="competitionLabel">CAMPIONATO</small></div>
+        <div class="broadcaster-bug"><b>S9</b><span>TV</span><small>LIVE</small></div>
+
+        <div id="receiverOverlay" class="receiver-overlay hidden"></div>
+        <div id="receiverHint" class="receiver-hint hidden">SCEGLI IL COMPAGNO · 1 / 2 / 3</div>
+        <button id="stopControl" class="stop-control hidden" type="button"><span>STOP</span><i></i></button>
+        <div id="cameraLabel" class="camera-label">CAMERA TV</div>
+        <div id="qteFlash" class="qte-flash hidden"><strong id="qteFlashTitle">PERFETTO!</strong><span id="qteFlashSub"></span></div>
+
+        <div id="lowerThird" class="lower-third">
+          <div class="lt-accent"></div>
+          <div><b id="lowerThirdTitle">TELECRONACA</b><span id="commentary">Le squadre entrano in campo.</span></div>
+        </div>
+
+        <div id="decision" class="decision tv-decision hidden">
+          <div id="momentType" class="eyebrow">MOMENTO CHIAVE</div>
+          <div id="actorCard" class="actor-card"><b id="actorName">—</b><span id="actorInfo">—</span></div>
+          <div id="chainStep" class="chain-step">FASE 1/2</div>
+          <h2 id="momentTitle"></h2>
+          <p id="momentText"></p>
+          <div id="choices" class="choices"></div>
+        </div>
+
+        <div id="qte" class="qte tv-qte hidden">
+          <div class="eyebrow">AZIONE LIVE</div>
+          <h2 id="qteTitle">TEMPO!</h2>
+          <div id="qteHint" class="qte-hint"></div>
+
+          <div id="qteTiming" class="qte-mode hidden">
+            <div class="meter"><div class="sweet"></div><div id="needle" class="needle"></div></div>
+            <button type="button" class="mainbtn" id="qteBtn">ORA!</button>
+          </div>
+
+          <div id="qteSequence" class="qte-mode hidden">
+            <div id="swipeArena" class="swipe-arena"><div class="swipe-ball">●</div><div id="swipeCue" class="swipe-cue">SCORRI</div></div>
+            <div id="seqDisplay" class="seq-display hidden"></div>
+            <div id="seqProgress" class="qte-progress">UN SOLO GESTO · SWIPE / MOUSE DRAG</div>
+          </div>
+
+          <div id="qteHold" class="qte-mode hidden">
+            <div class="power-shell"><div id="powerFill" class="power-fill"></div><div class="power-zone"></div></div>
+            <button type="button" class="mainbtn holdbtn" id="holdBtn">TIENI PREMUTO</button>
+            <div class="qte-progress">RILASCIA NELLA ZONA IDEALE</div>
+          </div>
+
+          <div id="qteAim" class="qte-mode hidden">
+            <div id="goalTarget" class="goal-target"><div id="aimZone" class="aim-zone"></div><div id="aimReticle" class="aim-reticle">+</div></div>
+            <button type="button" class="mainbtn" id="aimBtn">CALCIA!</button>
+          </div>
+
+          <div id="qteReaction" class="qte-mode hidden">
+            <div id="reactionSignal" class="reaction-signal">ATTENDI...</div>
+            <div class="reaction-zones"><button data-react="LEFT">SINISTRA</button><button data-react="RIGHT">DESTRA</button></div>
+          </div>
+
+          <div id="qteSetPiece" class="qte-mode hidden setpiece-qte">
+            <div class="setpiece-view">
+              <div class="setpiece-ball">●</div>
+              <div id="kickArrow" class="kick-arrow">➤</div>
+              <div class="setpiece-goalhint"><span></span><span></span><span></span></div>
+            </div>
+            <div id="setPieceStep" class="setpiece-step">1 · BLOCCA LA DIREZIONE</div>
+            <button type="button" class="mainbtn" id="setPieceBtn">BLOCCA DIREZIONE</button>
+            <div id="setPiecePower" class="setpiece-power hidden"><div class="sp-track"><div class="sp-ideal"></div><div id="spNeedle" class="sp-needle"></div></div><button type="button" class="mainbtn" id="setPiecePowerBtn">BLOCCA POTENZA</button></div>
+          </div>
+        </div>
+
+        <div id="outcomeBreakdown" class="outcome-breakdown tv-breakdown hidden">
+          <div class="eyebrow">ANALISI AZIONE</div>
+          <div id="outcomeTitle" class="outcome-title"></div>
+          <div id="outcomeFactors" class="outcome-factors"></div>
+          <div id="outcomeEquation" class="outcome-equation"></div>
+        </div>
+
+        <div id="homeBox" class="hidden"></div><div id="awayBox" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenResult" class="screen">
+    <header><b>RISULTATO FINALE</b><span id="resultRound"></span></header>
+    <div class="result-card">
+      <div id="resultScore" class="bigscore"></div>
+      <div id="resultSummary" class="summary"></div>
+      <button type="button" class="mainbtn" id="continueBtn">CONTINUA</button>
+    </div>
+  </section>
+</div>
+<script src="js/kit-profiles.js"></script>
+<script src="js/football-3d.js"></script>
+<script src="teams.js"></script>
+<script src="players.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
